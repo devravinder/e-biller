@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+    <head> 
+        <style>
+          
+            .loader{
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 90vw;
+                height: 90vh;
+            }
+
+            .hide{
+                visibility: hidden;
+            }
+        </style>
+    </head>
+  <body>
+
+    <h1 style="text-align: center"> Insta Credit Architecture</h1>
+    <hr/>
+    <pre class="mermaid hide">
+        architecture-beta
+
+   
+            %% Junction Definations
+
+            junction web_app_to_nginx_gateway_h1
+            junction nginx_gateway_to_loan_hub_server_h1
+            junction loan_hub_server_to_apache_kafka_h1
+
+            junction web_app_to_auth_server_h1
+            junction web_app_to_auth_server_h2
+
+            junction auth_server_to_loan_hub_server_h1
+            junction auth_server_to_loan_hub_server_h2
+
+
+            %% Group Definations
+
+
+            group client_apps(internet) [Client Apps]
+            service web_app(logos:react)[Web App] in client_apps
+
+            group api_gateway(logos:aws-elb) [Api Gateway]
+            service nginx_gateway(logos:nginx)[Nginx] in api_gateway
+
+            group loan_hub(server) [Loan Hub]
+            service loan_hub_server(logos:java) in loan_hub
+            
+
+            group credi_score(server) [Credi Score]
+            service credi_score_server(logos:java) in credi_score
+
+            group messaging_queue(server) [Message Queue]
+            service apache_kafka(logos:aws-sns)[ Apache Kafka] in messaging_queue
+
+            group auth_service(server) [ Auth Service]
+            service auth_server(logos:aws-iam) [Keycloak] in auth_service
+
+            group notification_service(server) [ Notifications Service]
+            service mail_seever(logos:google-gmail) [Mails] in notification_service
+
+            group loan_process_service(server) [ Loan Process]
+            service loan_process_server(fxemoji:clock3oclock) [Cron Jobs] in loan_process_service
+
+            %% Link Definations
+
+            web_app:R --> L:web_app_to_nginx_gateway_h1
+            web_app_to_nginx_gateway_h1:R --> L:nginx_gateway
+            nginx_gateway:R --> L:nginx_gateway_to_loan_hub_server_h1
+            nginx_gateway_to_loan_hub_server_h1:R --> L:loan_hub_server
+
+            loan_hub_server:R --> L:loan_hub_server_to_apache_kafka_h1
+            loan_hub_server_to_apache_kafka_h1:R --> L:apache_kafka
+
+
+            web_app:B --> T:web_app_to_auth_server_h1
+            web_app_to_auth_server_h1:R --> L:web_app_to_auth_server_h2
+            web_app_to_auth_server_h2:R --> L:auth_server
+
+            auth_server:R <-- L:auth_server_to_loan_hub_server_h1
+            auth_server_to_loan_hub_server_h1:R <-- L:auth_server_to_loan_hub_server_h2
+            loan_hub_server:B --> T:auth_server_to_loan_hub_server_h2 
+
+            loan_hub_server:T <-- B:credi_score_server
+
+            mail_seever:T <-- B:apache_kafka
+            loan_process_server:B <-- T:apache_kafka
+
+
+
+
+    </pre>
+
+    <h1 style="text-align: center"> Sevices </h1>
+    <hr/>
+    <h2> Loan Hub</h2>
+    <pre class="mermaid hide">
+        architecture-beta
+   
+            %% Junction Definations
+
+
+            %% Group Definations
+
+            group loan_hub(server) [Loan Hub]
+            service loan_hub_server(logos:java) in loan_hub
+            service postgres_db(logos:postgresql) in loan_hub
+            service redis_server(logos:redis) in loan_hub
+            
+        
+            %% Link Definations
+
+            loan_hub_server:T --> B:postgres_db
+            loan_hub_server:B --> T:redis_server
+
+
+    </pre>
+
+    <hr/>
+    <h2> Credi Score</h2>
+
+    <pre class="mermaid hide">
+        architecture-beta
+   
+            %% Junction Definations
+
+
+            %% Group Definations
+
+            group credi_score(server) [Credi Score]
+            service credi_score_server(logos:java) in credi_score
+            service mongo_db(logos:mongodb-icon) in credi_score
+            
+        
+            %% Link Definations
+
+            credi_score_server:T --> B:mongo_db
+
+
+    </pre>
+
+    <h2> Loan Process</h2>
+    <hr/>
+
+    <pre class="mermaid hide">
+        architecture-beta
+   
+            %% Junction Definations
+
+
+            %% Group Definations
+
+            group loan_process_service(server) [ Loan Process]
+            service loan_process_server(fxemoji:clock3oclock) [Cron Jobs] in loan_process_service
+            service postgres_db(logos:postgresql) in loan_process_service
+            service redis_server(logos:redis) in loan_process_service
+            
+        
+            %% Link Definations
+
+            loan_process_server:T --> B:postgres_db
+            loan_process_server:B --> T:redis_server
+            
+
+
+    </pre>
+    <div class="loader">
+        Loading...
+    </div>
+
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+        mermaid.registerIconPacks([
+            {
+                name: 'logos',
+                loader: () =>
+                    fetch('https://unpkg.com/@iconify-json/logos@1/icons.json').then((res) => res.json()),
+            },
+        ]);
+
+        mermaid.registerIconPacks([
+            {
+                name: 'fxemoji',
+                loader: () =>
+                    fetch('https://unpkg.com/@iconify-json/fxemoji@1/icons.json').then((res) => res.json()),
+            },
+        ]);
+
+        mermaid.initialize({ startOnLoad: true });
+
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const charts = document.querySelectorAll('.hide');
+
+                charts.forEach((chart) => {
+                    chart.classList.remove('hide');
+                });
+
+                const body = document.querySelector('body');
+                body.removeChild(document.querySelector('.loader'));
+
+            }, 1000);
+        });
+
+
+    </script>
+    
+  </body>
+</html>

@@ -1,7 +1,23 @@
 <!doctype html>
 <html lang="en">
+    <head> 
+        <style>
+          
+            .loader{
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 90vw;
+                height: 90vh;
+            }
+
+            .hide{
+                visibility: hidden;
+            }
+        </style>
+    </head>
   <body>
-    <pre class="mermaid">
+    <pre class="mermaid hide">
         architecture-beta
 
         junction server_data_v1
@@ -200,6 +216,9 @@
       
         auth_clients_h1:B --> T:auth_clients_v1
     </pre>
+    <div class="loader">
+        Loading...
+    </div>
 
     <script type="module">
         import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
@@ -218,6 +237,20 @@
                     fetch('https://unpkg.com/@iconify-json/fxemoji@1/icons.json').then((res) => res.json()),
             },
         ]);
+
+        mermaid.initialize({ startOnLoad: true });
+
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const mermaidContainer = document.querySelector('.mermaid');
+                mermaidContainer.classList.remove('hide');
+
+                const body = document.querySelector('body');
+                body.removeChild(document.querySelector('.loader'));
+
+            }, 1000);
+        });
+
 
     </script>
     
